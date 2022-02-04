@@ -10,6 +10,7 @@ class Job:
         self.arrival = arrival
         self.start = -1
         self.completed = -1
+        self.wait = 0
 
     def __str__(self):
         return "Job: " + str(self.name) +" Run Time: " +  str(self.run_time) +  " Arrival: " + str(self.arrival) + " Started: " + str(self.start) + " Completed: " + str(self.completed)
@@ -46,6 +47,10 @@ def round_robin(jobs, q):
     next_job = 1
     job_runtime = 0
     while len(running_jobs) > 0:
+        # Increment Waitt
+        for job in jobs:
+            if time >= job.arrival and job.run_time > 0 and job.name != running_jobs[current_job].name:
+                job.wait += 1
         # Update start time
         if running_jobs[current_job].start == -1:
             running_jobs[current_job].start = time
@@ -93,6 +98,10 @@ def srtn(jobs):
             current.start = time
         # Decrement Runtime
         current.run_time -= 1
+        # Increment Wait
+        for job in jobs:
+            if time >= job.arrival and job.run_time > 0 and job.name != current.name:
+                job.wait += 1
         # Check if completed
         if current.run_time > 0:
             q.put(current)
@@ -108,16 +117,16 @@ def fifo(jobs):
         job.start = time
         job.completed = time + job.run_time
         time += job.run_time
+        job.wait= job.start - job.arrival
 
 def print_jobs(jobs):
     avg_turn_around = 0
     avg_wait = 0
     for job in jobs:
         turn_around = job.completed - job.arrival
-        wait = job.start - job.arrival
-        print("Job {0} -- Turnaround {1:3.2f} Wait {2:3.2f}".format(job.name, turn_around, wait))
+        print("Job {0} -- Turnaround {1:3.2f} Wait {2:3.2f}".format(job.name, turn_around, job.wait))
         avg_turn_around += turn_around
-        avg_wait += wait
+        avg_wait += job.wait
     print("Average -- Turnaround {0:3.2f} Wait {1:3.2f}".format(avg_turn_around / len(jobs), avg_wait/ len(jobs)))
 
 def main():
