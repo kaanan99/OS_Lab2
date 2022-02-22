@@ -47,7 +47,7 @@ def round_robin(jobs, q):
     next_job = 1
     job_runtime = 0
     while len(running_jobs) > 0:
-        # Increment Waitt
+        # Increment Wait
         for job in jobs:
             if time >= job.arrival and job.run_time > 0 and job.name != running_jobs[current_job].name:
                 job.wait += 1
@@ -62,6 +62,15 @@ def round_robin(jobs, q):
         running_jobs[current_job].run_time -= 1
         job_runtime += 1
         time += 1
+
+        # Removing Job
+        if running_jobs[current_job].run_time <= 0:
+            running_jobs[current_job].completed = time
+            running_jobs.pop(current_job)
+            if current_job >= len(running_jobs):
+                current_job = 0
+            job_runtime = 0
+
         # Next Job
         if job_runtime == q:
             # Go to next job
@@ -70,13 +79,7 @@ def round_robin(jobs, q):
             # Check if at end of list
             if current_job == len(running_jobs):
                 current_job = 0
-        # Removing Job
-        if running_jobs[current_job].run_time == 0:
-            running_jobs[current_job].completed = time
-            running_jobs.pop(current_job)
-            if current_job >= len(running_jobs):
-                current_job = 0
-            job_runtime = 0
+
 
 
 
